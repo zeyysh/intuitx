@@ -1,0 +1,32 @@
+{% extends "rest_framework/base.html" %}
+
+
+{% block bootstrap_theme %}
+
+{% load static %}
+    <link rel="stylesheet" href="{% static "/rest_framework/bootstrap.min.css" %}" type="text/css">
+{% endblock %}
+
+{% block title %} Intuitx - API {% endblock %}
+
+{% block branding %}
+    <span>
+        <a href="" rel="nofollow" class="navbar-brand">
+        Intuitx APIs <span class="version">1</span>
+        </a>
+    </span>
+{% endblock %}
+
+
+{% block bootstrap_navbar_variant %}
+navbar navbar-expand-lg navbar-dark bg-primary
+{% endblock %}
+
+{% block style %}
+{{ block.super }}
+<style>
+.ul.nav.navbar-nav.pull-right li, ul.nav.navbar-nav.pull-right li a {
+    color: #FFFFFF !important;
+}
+</style>
+{% endblock %}

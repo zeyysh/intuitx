@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Title</title>
+        <style>
+            * {
+                box-sizing: border-box;
+            }
+            input[type=text], select, textarea {
+                width: 100%;
+                padding: 12px;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                resize: vertical;
+            }
+            label {
+                padding: 12px 12px 12px 0;
+                display: inline-block;
+            }
+            button[type=submit], button[type=button] {
+                background-color: #4CAF50;
+                color: white;
+                padding: 12px 20px;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                float: right;
+                margin-right: 12px;
+            }
+            button[type=submit]:hover {
+                background-color: #45a049;
+            }
+            .container {
+                border-radius: 5px;
+                background-color: #f2f2f2;
+                padding: 30px 30px 60px 30px;
+            }
+            .table {
+                border-bottom: 4px double #ccc;
+                margin-bottom: 30px;
+            }
+            table {
+                margin-bottom: 30px;
+            }
+            th {
+                float: left;
+                width: 25%;
+                margin-top: 6px;
+            }
+            td {
+                float: left;
+                width: 75%;
+                margin-top: 6px;
+            }
+            tr:after {
+                content: "";
+                display: table;
+                clear: both;
+            }
+            @media screen and (max-width: 600px) {
+                th, td, button[type=submit] {
+                    width: 100%;
+                    margin-top: 0;
+                }
+            }
+
+            [name=third_choice] {
+                height: 65px;
+            }
+
+        </style>
+    </head>
+    <body>
+        <div class="container">
+        <button type="button" id="btnAdd">Add few more Rows!</button>
+        <form method="post" id="querysetruleForm" data-secondchoices-url="{% url 'ajax_load_secondchoices' %}" data-thirdchoices-url="{% url 'ajax_load_thirdchoices' %}"novalidate>
+            <div id="example" class="display" style="width:100%">
+                <div class="table">
+                <table id='first'>
+                    {% csrf_token %}
+                    {{form.as_table}}
+                </table>
+                </div>
+            </div>
+            <button type="submit">Save</button>
+            <button type="submit"><a href="{% url 'person_changelist' %}">Nevermind</a></button>
+
+        </form>
+        <div id='inner' class="table" style="display: none;">
+            <table>
+                {% csrf_token %}
+                {{form.as_table}}
+            </table>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+
+    <script>
+        //-----------------------------------------------------
+        var id_first_choice = 'id_first_choice';
+        var id_second_choice = 'id_second_choice';
+        var id_third_choice = 'id_third_choice';
+        var num = 1;
+        $(document).ready(function() {
+            if (num == 1){
+                var first_table = $('#first');
+                // change label for
+                first_table.find('label')[2].setAttribute('for', 'id_first_choice' + num);
+                first_table.find('label')[3].setAttribute('for', 'id_second_choice' + num);
+                first_table.find('label')[4].setAttribute('for', 'id_third_choice' + num);
+                // change select id
+                first_table.find('SELECT')[2].id = 'id_first_choice' + num;
+                first_table.find('SELECT')[3].id = 'id_second_choice' + num;
+                first_table.find('SELECT')[4].id = 'id_third_choice' + num;
+                num = 2;
+
+                for (i = 2; i < 5; i++) {
+                    first_table.find('SELECT')[i].setAttribute('onclick', "clickfun(this.id)");
+                }
+            }
+        });
+        
+
+        $(document).ready(function () {
+            $('#btnAdd').click(function () {
+                console.log(num)
+                
+                var clonetable = $('#inner');
+                
+                clonetable = clonetable.clone();
+                // change label for
+                clonetable.find('label')[2].setAttribute('for', 'id_first_choice' + num);
+                clonetable.find('label')[3].setAttribute('for', 'id_second_choice' + num);
+                clonetable.find('label')[4].setAttribute('for', 'id_third_choice' + num);
+                // change select id
+                clonetable.find('SELECT')[2].id = 'id_first_choice' + num;
+                clonetable.find('SELECT')[3].id = 'id_second_choice' + num;
+                clonetable.find('SELECT')[4].id = 'id_third_choice' + num;
+                // set onclick
+                for (i = 2; i < 5; i++) {
+                    clonetable.find('SELECT')[i].setAttribute('onclick', "clickfun(this.id)");
+                }
+
+                clonetable.removeAttr('id');
+                clonetable.removeAttr('style');
+                clonetable.appendTo('#example');
+
+                num++;
+
+            });
+
+        });
+
+        //-----------------------------------------------------
+        var id_first;
+        var id_second;
+        var id_third;
+        var idnum;
+        var elemid;
+        
+        // (function clickfun(elemid) {
+        
+        function clickfun(elemid) {
+
+            if (elemid.includes(id_first_choice)) {
+                id_first = elemid;
+                idnum = id_first.length - id_first_choice.length;
+                id_second = id_second_choice + id_first.substring(id_first.length - idnum);
+            } else if (elemid.includes(id_second_choice)) {
+                id_second = elemid;
+                idnum = id_second.length - id_second_choice.length;
+                id_third = id_third_choice + id_second.substring(id_second.length - idnum);
+            }
+            
+            console.log(id_first);
+            console.log(id_second);
+            console.log(id_third);
+        
+
+            $('#' + id_first).change(function () {
+                console.log(id_first);
+                console.log(id_second);
+                console.log(id_third);
+                var url = $("#querysetruleForm").attr("data-secondchoices-url");
+                var firstchoiceId = $(this).val();
+
+                $.ajax({
+                    url: url,
+                    data: {
+                        'first_choice': firstchoiceId
+                    },
+                    success: function (data) {
+                        $('#' + id_second).html(data);
+                    }
+                });
+
+            });
+            $('#' + id_second).change(function () {
+                var url = $("#querysetruleForm").attr("data-thirdchoices-url");
+                var secondchoiceId = $(this).val();
+
+                $.ajax({
+                    url: url,
+                    data: {
+                        'second_choice': secondchoiceId
+                    },
+                    success: function (data) {
+                        $("#" + id_third).html(data);
+                    }
+                });
+
+            });
+        }
+    </script>
+
+
+    </body>
+</html>
